@@ -29,9 +29,9 @@
 </form>
 
 <p>
-<br><br>
+<br>
 <div id="info"></div>
-</p>
+</p><br><br>
 
 
 
@@ -87,6 +87,11 @@ function getInfo() {
             // set the innerHTML of the "info" div
             document.getElementById("info").innerHTML = msg;
         }
+        else{
+            errorMsg = "<b>Error: Pokemon does not exist or could not be retrieved at this time</b>";
+            document.getElementById("info").innerHTML = errorMsg;
+        }
+        
     }
 
     // submit a 'get' request to the pokeapi; 'true' is used to make the request asynchronously
