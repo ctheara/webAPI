@@ -12,11 +12,17 @@
       </head>
 <body onload = "readFromLocalStorage();">
 
-<h2>PokeAPI Example</h2>
+<h2>Pokemon Stats</h2>
 
-<p>
-Clicking the button will make a request to the PokeAPI, which returns data in JSON format. That data is then parsed and displayed on this page. Clicking the button will make a request to the following page: <a href = "https://pokeapi.co/api/v2/pokemon/1/">https://pokeapi.co/api/v2/pokemon/1/</a>.
-</p>
+<p></p>Using stats from PokeAPI</p>
+
+<form onsubmit = 'save();'>
+    <label for = 'name'>Pokemon Name: </label>
+    <input id = 'name' type = 'text' required> <br>
+    <br><br>
+    <input type = "submit" value = "Submit" onclick="getInfo()"> 
+    <input id = 'btnReset' type = "reset">
+</form>
 
 <p>
 <button type="button" onclick="getInfo()">Get Info from PokeAPI</button>
@@ -25,22 +31,19 @@ Clicking the button will make a request to the PokeAPI, which returns data in JS
 </p>
 
 
-<form onsubmit = 'save();'>
-    <label for = 'name'>Pokemon Name: </label>
-    <input id = 'name' type = 'text' required> <br>
-    <br><br>
-    <input type = "submit" value = "Submit"> 
-    <input id = 'btnReset' type = "reset">
-</form>
+
 
 <script>
 var record;
 
+//get info from API
 function getInfo() {
 
     var xhttp = new XMLHttpRequest();
 
-    // since Javascript is asynchronous, we respond to a state change event for the request by 
+    //user pokemon input
+    pokemonName = document.getElementById('name').value.trim().toLowerCase();
+
     // defining a function and assigning it to 'xhttp.onreadystatechange'.
     xhttp.onreadystatechange = function() {
         // if request is successful
@@ -49,9 +52,14 @@ function getInfo() {
             localStorage.setItem('pokemon', recordStr);
 
             record = JSON.parse(recordStr);
-            msg = "Name: " + record.name + "<br>Abilities: ";
 
+            //get stats for pokemon
+            msg = "Name: " + record.name +"<br>";
+            msg += "Height: " + record.height/10 + " meters<br>";
+            msg += "Weight: " + record.weight/10 + " meters<br>"
+            
             // for each ability, add its name to the string
+            msg += "Abilities: ";
             for (var i = 0; i < record.abilities.length; i++) {
                 msg += record.abilities[i].ability.name;
                 if (i + 1 != record.abilities.length) {
@@ -59,13 +67,25 @@ function getInfo() {
                 }
             }
 
+            //list type stat
+            msg += "<br>Type: ";
+            for (var i = 0; i < record.types.length; i++) {
+                msg += record.types[i].type.name;
+                if (i + 1 != record.types.length) {
+                    msg += ", ";
+                }
+            }
+
+            //get image
+            msg += '<br><img src="' + record.sprites.front_default+'">';
+
             // set the innerHTML of the "info" div
             document.getElementById("info").innerHTML = msg;
         }
     }
 
     // submit a 'get' request to the pokeapi; 'true' is used to make the request asynchronously
-    xhttp.open("GET", "https://pokeapi.co/api/v2/pokemon/1/", true);
+    xhttp.open("GET", "https://pokeapi.co/api/v2/pokemon/"+pokemonName, true);
     xhttp.send();
 };
 
