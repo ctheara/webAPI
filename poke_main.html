@@ -1,0 +1,128 @@
+<html>
+    <head>
+        <style>
+          #pastInfo {
+              border: solid 1px blue;
+       
+
+          }
+
+        </style>
+    
+      </head>
+<body onload = "readFromLocalStorage();">
+
+<h2>PokeAPI Example</h2>
+
+<p>
+Clicking the button will make a request to the PokeAPI, which returns data in JSON format. That data is then parsed and displayed on this page. Clicking the button will make a request to the following page: <a href = "https://pokeapi.co/api/v2/pokemon/1/">https://pokeapi.co/api/v2/pokemon/1/</a>.
+</p>
+
+<p>
+<button type="button" onclick="getInfo()">Get Info from PokeAPI</button>
+<br><br>
+<div id="info"></div>
+</p>
+
+
+<form onsubmit = 'save();'>
+    <label for = 'name'>Pokemon Name: </label>
+    <input id = 'name' type = 'text' required> <br>
+    <br><br>
+    <input type = "submit" value = "Submit"> 
+    <input id = 'btnReset' type = "reset">
+</form>
+
+<script>
+var record;
+
+function getInfo() {
+
+    var xhttp = new XMLHttpRequest();
+
+    // since Javascript is asynchronous, we respond to a state change event for the request by 
+    // defining a function and assigning it to 'xhttp.onreadystatechange'.
+    xhttp.onreadystatechange = function() {
+        // if request is successful
+        if (this.readyState == 4 && this.status == 200) {
+            recordStr = this.responseText; // JSON format
+            localStorage.setItem('pokemon', recordStr);
+
+            record = JSON.parse(recordStr);
+            msg = "Name: " + record.name + "<br>Abilities: ";
+
+            // for each ability, add its name to the string
+            for (var i = 0; i < record.abilities.length; i++) {
+                msg += record.abilities[i].ability.name;
+                if (i + 1 != record.abilities.length) {
+                    msg += ", ";
+                }
+            }
+
+            // set the innerHTML of the "info" div
+            document.getElementById("info").innerHTML = msg;
+        }
+    }
+
+    // submit a 'get' request to the pokeapi; 'true' is used to make the request asynchronously
+    xhttp.open("GET", "https://pokeapi.co/api/v2/pokemon/1/", true);
+    xhttp.send();
+};
+
+
+//Save info to local storage
+function save() {
+    var pName = document.getElementById('name').value.trim();
+
+    if (pName == '') {
+        return;
+    }
+
+    // create pokemon object
+    var pokemon = {name: pName};
+
+    // convert person to JSON string and store in local storage 
+    var pokemonStr = JSON.stringify(pokemon);
+    localStorage.setItem("name", pokemonStr);
+
+    readFromLocalStorage();
+
+    return true;
+
+}
+
+//Retrieve local storage that is saved
+function readFromLocalStorage() {
+    //Retrieving data:
+    var storedNameString = localStorage.getItem("name");
+
+    if (storedNameString) {
+        var storedName = JSON.parse(storedNameString);
+
+        msg = 'Past Search: <br>';
+        msg += 'Welcome ' + storedName.name;
+
+    } else {
+        msg = 'No past search';
+    }
+    
+    document.getElementById("pastInfo").innerHTML = msg;
+}
+
+
+function clear() {
+    localStorage.removeItem('name');
+    readFromLocalStorage();
+    document.getElementById('btnReset').click();
+    alert('Cleared');
+}
+
+
+
+
+</script>
+
+<div id="pastInfo"></div>
+
+</body>
+</html>
