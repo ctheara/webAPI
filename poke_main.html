@@ -2,33 +2,38 @@
     <head>
         <style>
           #pastInfo {
-              border: solid 1px blue;
-       
-
+              border: solid 1px black;
           }
+
+          #mainForm {
+          }
+
+          h1 {text-align: center;}
 
         </style>
     
       </head>
 <body onload = "readFromLocalStorage();">
 
-<h2>Pokemon Stats</h2>
+<h1>Pokemon Stats</h1>
 
-<p></p>Using stats from PokeAPI</p>
+<p>Using stats from PokeAPI. Type in pokemon name below. (try: piplup, ditto, snorlax)</p>
+<br>
 
-<form onsubmit = 'save();'>
-    <label for = 'name'>Pokemon Name: </label>
+<form id = 'mainForm' style="color:brown">
+    <label for = 'name'>Enter Pokemon Name: </label>
     <input id = 'name' type = 'text' required> <br>
-    <br><br>
+    <br>
     <input type = "submit" value = "Submit" onclick="getInfo()"> 
     <input id = 'btnReset' type = "reset">
 </form>
 
 <p>
-<button type="button" onclick="getInfo()">Get Info from PokeAPI</button>
 <br><br>
 <div id="info"></div>
 </p>
+
+
 
 
 
@@ -49,12 +54,12 @@ function getInfo() {
         // if request is successful
         if (this.readyState == 4 && this.status == 200) {
             recordStr = this.responseText; // JSON format
-            localStorage.setItem('pokemon', recordStr);
+            localStorage.setItem('pokemon', recordStr); //Save info to local storage
 
             record = JSON.parse(recordStr);
 
             //get stats for pokemon
-            msg = "Name: " + record.name +"<br>";
+            msg = "<b><u>Result:</b></u> <br>Name: " + record.name +"<br>";
             msg += "Height: " + record.height/10 + " meters<br>";
             msg += "Weight: " + record.weight/10 + " meters<br>"
             
@@ -90,37 +95,44 @@ function getInfo() {
 };
 
 
-//Save info to local storage
-function save() {
-    var pName = document.getElementById('name').value.trim();
-
-    if (pName == '') {
-        return;
-    }
-
-    // create pokemon object
-    var pokemon = {name: pName};
-
-    // convert person to JSON string and store in local storage 
-    var pokemonStr = JSON.stringify(pokemon);
-    localStorage.setItem("name", pokemonStr);
-
-    readFromLocalStorage();
-
-    return true;
-
-}
 
 //Retrieve local storage that is saved
 function readFromLocalStorage() {
     //Retrieving data:
-    var storedNameString = localStorage.getItem("name");
+    var storedNameString = localStorage.getItem("pokemon");
 
     if (storedNameString) {
         var storedName = JSON.parse(storedNameString);
 
-        msg = 'Past Search: <br>';
-        msg += 'Welcome ' + storedName.name;
+        msg = '<u><b>Past Search:</u></b> <br><br>';
+
+        //get stats for pokemon
+        msg += "Name: " + storedName.name +"<br>";
+            msg += "Height: " + storedName.height/10 + " meters<br>";
+            msg += "Weight: " + storedName.weight/10 + " meters<br>"
+            
+            // for each ability, add its name to the string
+            msg += "Abilities: ";
+            for (var i = 0; i < storedName.abilities.length; i++) {
+                msg += storedName.abilities[i].ability.name;
+                if (i + 1 != storedName.abilities.length) {
+                    msg += ", ";
+                }
+            }
+
+            //list type stat
+            msg += "<br>Type: ";
+            for (var i = 0; i < storedName.types.length; i++) {
+                msg += storedName.types[i].type.name;
+                if (i + 1 != storedName.types.length) {
+                    msg += ", ";
+                }
+            }
+
+            //get image
+            msg += '<br><img src="' + storedName.sprites.front_default+'">';
+            //msg += '<a href = "#" onclick = "clear();">Clear past search</a>';
+
 
     } else {
         msg = 'No past search';
@@ -131,7 +143,7 @@ function readFromLocalStorage() {
 
 
 function clear() {
-    localStorage.removeItem('name');
+    localStorage.removeItem('pokemon');
     readFromLocalStorage();
     document.getElementById('btnReset').click();
     alert('Cleared');
