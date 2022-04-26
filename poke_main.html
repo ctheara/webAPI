@@ -1,18 +1,17 @@
+<!DOCTYPE html>
 <html>
     <head>
+        <title>Pokemon</title>
+
         <style>
           #pastInfo {
               border: solid 1px black;
           }
 
-          #mainForm {
-          }
-
           h1 {text-align: center;}
-
         </style>
-    
       </head>
+
 <body onload = "readFromLocalStorage();">
 
 <h1>Pokemon Stats</h1>
@@ -29,137 +28,140 @@
 </form>
 
 <p>
-<br>
-<div id="info"></div>
-</p><br><br>
+    <br>
+    <div id="info"></div>
+</p>
+<br><br>
 
 
 
+<div id="pastInfo"></div>
 
 
 
 <script>
-var record;
-
-//get info from API
-function getInfo() {
-
-    var xhttp = new XMLHttpRequest();
-
-    //user pokemon input
-    pokemonName = document.getElementById('name').value.trim().toLowerCase();
-
-    // defining a function and assigning it to 'xhttp.onreadystatechange'.
-    xhttp.onreadystatechange = function() {
-        // if request is successful
-        if (this.readyState == 4 && this.status == 200) {
-            recordStr = this.responseText; // JSON format
-            localStorage.setItem('pokemon', recordStr); //Save info to local storage
-
-            record = JSON.parse(recordStr);
-
-            //get stats for pokemon
-            msg = "<b><u>Result:</b></u> <br>Name: " + record.name +"<br>";
-            msg += "Height: " + record.height/10 + " meters<br>";
-            msg += "Weight: " + record.weight/10 + " kilograms<br>"
+    var record;
+    
+    //get info from API
+    function getInfo() {
+    
+        var xhttp = new XMLHttpRequest();
+    
+        //user pokemon input
+        pokemonName = document.getElementById('name').value.trim().toLowerCase();
+    
+        // defining a function and assigning it to 'xhttp.onreadystatechange'.
+        xhttp.onreadystatechange = function() {
+            // if request is successful
+            if (this.readyState == 4 && this.status == 200) {
+                recordStr = this.responseText; // JSON format
+                localStorage.setItem('pokemon', recordStr); //Save info to local storage
+    
+                record = JSON.parse(recordStr);
+    
+                //get stats for pokemon
+                msg = "<b><u>Result:</b></u> <br>Name: " + record.name +"<br>";
+                msg += "Height: " + record.height/10 + " meters<br>";
+                msg += "Weight: " + record.weight/10 + " kilograms<br>"
+                
+                // for each ability, add its name to the string
+                msg += "Abilities: ";
+                for (var i = 0; i < record.abilities.length; i++) {
+                    msg += record.abilities[i].ability.name;
+                    if (i + 1 != record.abilities.length) {
+                        msg += ", ";
+                    }
+                }
+    
+                //list type stat
+                msg += "<br>Type: ";
+                for (var i = 0; i < record.types.length; i++) {
+                    msg += record.types[i].type.name;
+                    if (i + 1 != record.types.length) {
+                        msg += ", ";
+                    }
+                }
+    
+                //get image
+                msg += '<br><img src="' + record.sprites.front_default+'">';
+    
+                // set the innerHTML of the "info" div
+                document.getElementById("info").innerHTML = msg;
+            }
+            else{
+                errorMsg = "<b>Error: Pokemon does not exist or could not be retrieved at this time</b>";
+                document.getElementById("info").innerHTML = errorMsg;
+            }
             
-            // for each ability, add its name to the string
-            msg += "Abilities: ";
-            for (var i = 0; i < record.abilities.length; i++) {
-                msg += record.abilities[i].ability.name;
-                if (i + 1 != record.abilities.length) {
-                    msg += ", ";
-                }
-            }
-
-            //list type stat
-            msg += "<br>Type: ";
-            for (var i = 0; i < record.types.length; i++) {
-                msg += record.types[i].type.name;
-                if (i + 1 != record.types.length) {
-                    msg += ", ";
-                }
-            }
-
-            //get image
-            msg += '<br><img src="' + record.sprites.front_default+'">';
-
-            // set the innerHTML of the "info" div
-            document.getElementById("info").innerHTML = msg;
         }
-        else{
-            errorMsg = "<b>Error: Pokemon does not exist or could not be retrieved at this time</b>";
-            document.getElementById("info").innerHTML = errorMsg;
+    
+        // submit a 'get' request to the pokeapi; 'true' is used to make the request asynchronously
+        xhttp.open("GET", "https://pokeapi.co/api/v2/pokemon/"+pokemonName, true);
+        //xhttp.open("GET", "https://pokeapi.co/api/v2/pokemon/"+pokemonName, true);
+        xhttp.send();
+    };
+    
+    
+    
+    //Retrieve local storage that is saved
+    function readFromLocalStorage() {
+        //Retrieving data:
+        var storedNameString = localStorage.getItem("pokemon");
+    
+        if (storedNameString) {
+            var storedName = JSON.parse(storedNameString);
+    
+            msg = '<u><b>Past Search:</u></b> <br><br>';
+    
+            //get stats for pokemon
+            msg += "Name: " + storedName.name +"<br>";
+                msg += "Height: " + storedName.height/10 + " meters<br>";
+                msg += "Weight: " + storedName.weight/10 + " kilograms<br>"
+                
+                // for each ability, add its name to the string
+                msg += "Abilities: ";
+                for (var i = 0; i < storedName.abilities.length; i++) {
+                    msg += storedName.abilities[i].ability.name;
+                    if (i + 1 != storedName.abilities.length) {
+                        msg += ", ";
+                    }
+                }
+                
+    
+                //list type stat
+                msg += "<br>Type: ";
+                for (var i = 0; i < storedName.types.length; i++) {
+                    msg += storedName.types[i].type.name;
+                    if (i + 1 != storedName.types.length) {
+                        msg += ", ";
+                    }
+                }
+    
+                //get image
+                msg += '<br><img src="' + storedName.sprites.front_default+'">';
+                //msg += '<a href = "#" onclick = "clear();">Clear past search</a>';
+    
+    
+        } else {
+            msg = 'No past search';
         }
         
-    }
-
-    // submit a 'get' request to the pokeapi; 'true' is used to make the request asynchronously
-    xhttp.open("GET", "https://pokeapi.co/api/v2/pokemon/"+pokemonName, true);
-    xhttp.send();
-};
-
-
-
-//Retrieve local storage that is saved
-function readFromLocalStorage() {
-    //Retrieving data:
-    var storedNameString = localStorage.getItem("pokemon");
-
-    if (storedNameString) {
-        var storedName = JSON.parse(storedNameString);
-
-        msg = '<u><b>Past Search:</u></b> <br><br>';
-
-        //get stats for pokemon
-        msg += "Name: " + storedName.name +"<br>";
-            msg += "Height: " + storedName.height/10 + " meters<br>";
-            msg += "Weight: " + storedName.weight/10 + " kilograms<br>"
-            
-            // for each ability, add its name to the string
-            msg += "Abilities: ";
-            for (var i = 0; i < storedName.abilities.length; i++) {
-                msg += storedName.abilities[i].ability.name;
-                if (i + 1 != storedName.abilities.length) {
-                    msg += ", ";
-                }
-            }
-
-            //list type stat
-            msg += "<br>Type: ";
-            for (var i = 0; i < storedName.types.length; i++) {
-                msg += storedName.types[i].type.name;
-                if (i + 1 != storedName.types.length) {
-                    msg += ", ";
-                }
-            }
-
-            //get image
-            msg += '<br><img src="' + storedName.sprites.front_default+'">';
-            //msg += '<a href = "#" onclick = "clear();">Clear past search</a>';
-
-
-    } else {
-        msg = 'No past search';
+        document.getElementById("pastInfo").innerHTML = msg;
     }
     
-    document.getElementById("pastInfo").innerHTML = msg;
-}
+    
+    function clear() {
+        localStorage.removeItem('pokemon');
+        readFromLocalStorage();
+        document.getElementById('btnReset').click();
+        alert('Cleared');
+    }
+    
+    
+    
+    
+    </script>
 
-
-function clear() {
-    localStorage.removeItem('pokemon');
-    readFromLocalStorage();
-    document.getElementById('btnReset').click();
-    alert('Cleared');
-}
-
-
-
-
-</script>
-
-<div id="pastInfo"></div>
 
 </body>
 </html>
